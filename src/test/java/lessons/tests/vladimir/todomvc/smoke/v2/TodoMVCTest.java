@@ -2,6 +2,7 @@ package lessons.tests.vladimir.todomvc.smoke.v2;
 
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.SelenideElement;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,6 +10,7 @@ import static com.codeborne.selenide.CollectionCondition.empty;
 import static com.codeborne.selenide.CollectionCondition.exactTexts;
 import static com.codeborne.selenide.Condition.cssClass;
 import static com.codeborne.selenide.Condition.exactText;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.*;
 
 /**
@@ -24,31 +26,31 @@ public class TodoMVCTest {
     @Test
     public void testBasicUserActivity() {
 
-        add("1", "2", "3");
+        add("1");
+        editTask("1", "1e").pressEnter();
+        assertTasksAre("1e");
         toggleAll();
 
-        showCompleted();
-        editTask("1", "1e");
-        toggleTask("1e");
-        delete("2");
-        clearComplited();
-        tasks.filterBy(cssClass("completed")).shouldBe(empty);
 
         showActive();
-        editTask("1e", "1");
-        delete("1");
-        add("2", "3", "4");
+        assertActiveListIsEmpty();
+        add("2");
+        editTask("2", "2e").pressEscape();
         toggleTask("2");
-        toggleAll();
-        tasks.filterBy(cssClass("active")).shouldBe(empty);
+        assertActiveListIsEmpty();
+
+        showCompleted();
+        assertTasksAre("1e","2");
+        toggleTask("1e");
+        clearComplited();
+        assertCompletedListIsEmpty();
 
         showAll();
-        assertTasksAre("2", "3", "4");
-        clearComplited();
-        tasks.shouldBe(empty);
+        delete("1e");
+        assertTasksListIsEmpty();;
     }
 
-    ElementsCollection tasks = $$("#todo-list li");
+    ElementsCollection tasks = $$("#todo-list>li");
     ElementsCollection filters = $$("#filters a");
 
     private void add(String... taskTexts) {
@@ -59,6 +61,18 @@ public class TodoMVCTest {
 
     private void assertTasksAre(String... taskTexts) {
         tasks.shouldHave(exactTexts(taskTexts));
+    }
+
+    private void  assertActiveListIsEmpty(){
+        tasks.filterBy(cssClass("active")).shouldBe(empty);
+    }
+
+    private void  assertCompletedListIsEmpty(){
+        tasks.filterBy(cssClass("completed")).shouldBe(empty);
+    }
+
+    private void assertTasksListIsEmpty(){
+        tasks.shouldBe(empty);
     }
 
     private void clearComplited() {
@@ -89,9 +103,10 @@ public class TodoMVCTest {
         filters.find(exactText("Completed")).click();
     }
 
-    private void editTask(String taskText, String newText) {
+    private SelenideElement editTask(String taskText, String newText) {
         tasks.find(exactText(taskText)).doubleClick();
-        $("input.edit").clear();
-        $("input.edit").setValue(newText).pressEnter();
+        $("li.editing>input.edit").clear();
+        return $("li.editing>input.edit").shouldBe(visible).setValue(newText);
+
     }
 }
