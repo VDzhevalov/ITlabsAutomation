@@ -35,6 +35,7 @@ public class TodoMVCTest {
         addTasks("2");
         startEditTask("2", "2 edit canceled").pressEscape();
         toggleTask("2");
+        assertItemsLeft(0);
         assertVisibleTasksListIsEmpty();
 
         filterCompleted();
