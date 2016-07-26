@@ -24,35 +24,36 @@ public class TodoMVCTest {
     @Test
     public void testTasksLifeCycle() {
 
-        addTask("1");
+        addTasks("1");
         startEditTask("1", "1 edited").pressEnter();
         assertTasksAre("1 edited");
         toggleAllTasks();
         assertTasksAre("1 edited");
 
         filterActive();
-        assertVisibleTasksIsEmpty();
-        addTask("2");
+        assertVisibleTasksListIsEmpty();
+        addTasks("2");
         startEditTask("2", "2 edit canceled").pressEscape();
         toggleTask("2");
-        assertVisibleTasksIsEmpty();
+        assertVisibleTasksListIsEmpty();
 
         filterCompleted();
         assertVisibleTasksAre("1 edited", "2");
         //Activate
         toggleTask("2");
+        assertVisibleTasksAre("1 edited");
         clearCompleted();
-        assertVisibleTasksIsEmpty();
+        assertVisibleTasksListIsEmpty();
 
         filterAll();
-        assertItemsLeftCounterEquals("1");
+        assertItemsLeft(1);
         deleteTask("2");
         assertTasksListIsEmpty();
     }
 
     ElementsCollection tasks = $$("#todo-list>li");
 
-    private void addTask(String... texts) {
+    private void addTasks(String... texts) {
         for (String text : texts) {
             $("#new-todo").setValue(text).pressEnter();
         }
@@ -66,7 +67,7 @@ public class TodoMVCTest {
         tasks.filterBy(visible).shouldHave(exactTexts(texts));
     }
 
-    private void assertVisibleTasksIsEmpty() {
+    private void assertVisibleTasksListIsEmpty() {
         tasks.filterBy(visible).shouldBe(empty);
     }
 
@@ -74,8 +75,8 @@ public class TodoMVCTest {
         tasks.shouldBe(empty);
     }
 
-    private void assertItemsLeftCounterEquals(String counter) {
-        $("#todo-count").shouldBe(text(counter + " item"));
+    private void assertItemsLeft(Integer counter) {
+        $("#todo-count").$("strong").shouldHave(exactText(counter+""));
     }
 
     private void clearCompleted() {
