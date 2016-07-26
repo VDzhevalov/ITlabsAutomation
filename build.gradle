@@ -9,6 +9,23 @@ repositories {
     mavenCentral()
 }
 
+sourceSets {
+    smokeTests {
+        java.srcDir("src/smokeTests/java/")
+        resources.srcDir("src/smokeTests/resources/")
+        compileClasspath = sourceSets.main.output + configurations.testRuntime
+        runtimeClasspath =  output + compileClasspath
+    }
+}
+
+task smokeTests(type: Test){
+    description = 'Run The Smoke Tests'
+    group = 'verification'
+    testClassesDir = sourceSets.smokeTests.output.classesDir
+    classpath = sourceSets.smokeTests.runtimeClasspath
+    //testResultsDir = file ("$testResultsDir/smoke")
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile 'com.codeborne:selenide:3.7'
